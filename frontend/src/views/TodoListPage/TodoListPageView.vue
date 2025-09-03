@@ -1,6 +1,41 @@
 <script setup>
 
 import TheNav from '@/components/layout/TheNav.vue';
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const todos = ref([])
+
+const newTodo = ref('')
+
+// 新增
+const addTodo = () => {
+  if (!newTodo.value.trim()) return
+  todos.value.push(
+    {
+      id: Date.now(),
+      text: newTodo.value,
+      completed: false
+    }
+  )
+  newTodo.value = ''
+}
+
+// 刪除
+const removeTodo = (id) => {
+  todos.value = todos.value.filter(todo => todo.id !== id)
+}
+
+// 已完成切換
+const toggleTodo = (id) => {
+  const todo = todos.value.find(t => t.id === id)
+  if (todo) todo.completed = !todo.completed
+}
+
+// 已完成數量
+const completedCount = computed(() => todos.value.filter(t => t.completed).length)
 
 </script>
 
@@ -10,89 +45,47 @@ import TheNav from '@/components/layout/TheNav.vue';
 
     <div id="todoListPage" class="todoListPage">
 
-      <TheNav/>
+      <TheNav />
 
       <div class="todoList_Content">
         <div class="inputBox">
-          <input type="text" placeholder="請輸入待辦事項">
-          <a href="#">
-            <i class="fa fa-plus"></i>
-          </a>
+          <input v-model="newTodo" type="text" placeholder="請輸入待辦事項">
+          <a href="#" @click.prevent="addTodo"><i class="fa fa-plus"></i></a>
         </div>
-        <div class="todoList_list">
+        <div class="todoList_list" v-if="todos.length > 0">
           <ul class="todoList_tab">
             <li>
-              <router-link to="/todolist-page" class="tab-link" active-class="active">全部</router-link>
+              <router-link to="/todolist-page" class="tab-link" :class="{ active: route.path === '/todolist-page' }">
+                全部
+              </router-link>
             </li>
             <li>
-              <router-link to="/todolist-page/active" class="tab-link" active-class="active">待完成</router-link>
+              <router-link to="/todolist-page/active" class="tab-link"
+                :class="{ active: route.path === '/todolist-page/active' }">
+                待完成
+              </router-link>
             </li>
             <li>
-              <router-link to="/todolist-page/completed" class="tab-link" active-class="active">已完成</router-link>
+              <router-link to="/todolist-page/completed" class="tab-link"
+                :class="{ active: route.path === '/todolist-page/completed' }">
+                已完成
+              </router-link>
             </li>
           </ul>
           <div class="todoList_items">
             <ul class="todoList_item">
-              <router-view/>
-              <!-- <li>
-                <label class="todoList_label">
-                  <input class="todoList_input" type="checkbox" value="true">
-                  <span>把冰箱發霉的檸檬拿去丟</span>
-                </label>
-                <a href="#">
-                  <i class="fa fa-times"></i>
-                </a>
-              </li>
-              <li>
-                <label class="todoList_label">
-                  <input class="todoList_input" type="checkbox" value="true">
-                  <span>打電話叫媽媽匯款給我</span>
-                </label>
-                <a href="#">
-                  <i class="fa fa-times"></i>
-                </a>
-              </li>
-              <li>
-                <label class="todoList_label">
-                  <input class="todoList_input" type="checkbox" value="true">
-                  <span>整理電腦資料夾</span>
-                </label>
-                <a href="#">
-                  <i class="fa fa-times"></i>
-                </a>
-              </li>
-              <li>
-                <label class="todoList_label">
-                  <input class="todoList_input" type="checkbox" value="true">
-                  <span>繳電費水費瓦斯費</span>
-                </label>
-                <a href="#">
-                  <i class="fa fa-times"></i>
-                </a>
-              </li>
-              <li>
-                <label class="todoList_label">
-                  <input class="todoList_input" type="checkbox" value="true">
-                  <span>約vicky禮拜三泡溫泉</span>
-                </label>
-                <a href="#">
-                  <i class="fa fa-times"></i>
-                </a>
-              </li>
-              <li>
-                <label class="todoList_label">
-                  <input class="todoList_input" type="checkbox" value="true">
-                  <span>約ada禮拜四吃晚餐</span>
-                </label>
-                <a href="#">
-                  <i class="fa fa-times"></i>
-                </a>
-              </li> -->
+              <router-view v-slot="{ Component }">
+                <component :is="Component" :todos="todos" @remove="removeTodo" @toggle="toggleTodo" />
+              </router-view>
             </ul>
             <div class="todoList_statistics">
-              <p> 5 個已完成項目</p>
+              <p> {{ completedCount }} 個已完成項目</p>
             </div>
           </div>
+        </div>
+        <div class="todoList_list" v-else>
+          <p class="noItem">目前尚無待辦事項</p>
+          <img src="/public/todo_banner.png" alt="todo_banner">
         </div>
       </div>
 
@@ -192,13 +185,13 @@ import TheNav from '@/components/layout/TheNav.vue';
           border-bottom: 2px solid #efefef;
         }
 
-        a:active {
+        a.active {
           color: $font-color;
           border-bottom: 2px solid $font-color;
         }
       }
 
-      .todoList_items {
+      ::v-deep(.todoList_items) {
         padding-top: 23px;
         padding-left: 24px;
         padding-right: 17px;
@@ -226,7 +219,7 @@ import TheNav from '@/components/layout/TheNav.vue';
           margin-right: 16px;
         }
 
-        .todoList_input:checked ~ span {
+        .todoList_input:checked~span {
           color: #9F9A91;
           text-decoration: line-through;
           transition: all 0.4s ease-in-out;
@@ -242,8 +235,12 @@ import TheNav from '@/components/layout/TheNav.vue';
           margin-left: 17px;
           display: block;
           font-size: 14px;
-          color: $font-color;
+          color: red;
           opacity: 0;
+        }
+
+        li a i {
+          font-size: 20px;
         }
 
         li:hover a {
@@ -265,6 +262,16 @@ import TheNav from '@/components/layout/TheNav.vue';
           font-size: 0.875rem;
           text-decoration: none;
         }
+      }
+
+      .noItem{
+        font-size: 20px;
+        text-align: center;
+        margin: 30px;
+      }
+
+      img{
+        padding: 20px;
       }
     }
   }

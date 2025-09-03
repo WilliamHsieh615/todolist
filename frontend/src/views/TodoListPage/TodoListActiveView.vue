@@ -1,6 +1,16 @@
+<script setup>
+const props = defineProps(['todos'])
+const emit = defineEmits(['remove', 'toggle'])
+</script>
+
 <template>
-  <div>
-    <h3>待完成事項</h3>
-    <!-- 這裡放待完成列表 -->
-  </div>
+  <li v-for="todo in props.todos.filter(t => !t.completed)" :key="todo.id">
+    <label class="todoList_label">
+      <input class="todoList_input" type="checkbox" :checked="todo.completed" @change="emit('toggle', todo.id)">
+      <span>{{ todo.text }}</span>
+    </label>
+    <a href="#" @click.prevent="emit('remove', todo.id)">
+      <i class="fa-solid fa-trash"></i>
+    </a>
+  </li>
 </template>

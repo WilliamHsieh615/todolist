@@ -4,7 +4,7 @@
 
   <aside class="side">
     <router-link to="/"><img class="logo" src="/public/title.png" alt="logo"></router-link>
-    <img class="d-m-n" src="/public/banner.png" alt="workImg">
+    <img class="d-m-n banner" src="/public/banner.png" alt="workImg">
   </aside>
 
 </template>
@@ -21,13 +21,16 @@
 
 @media (max-width: 800px) {
   .side {
-    width: 60%;
+    width: 80%;
   }
 }
 
 @media (max-width: 500px) {
+  .banner{
+    display: none;
+  }
   .side {
-    width: 80%;
+    width: 100%;
   }
 }
 </style>

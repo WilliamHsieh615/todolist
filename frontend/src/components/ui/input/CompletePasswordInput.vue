@@ -2,6 +2,9 @@
 
 import {ref} from 'vue';
 
+const props = defineProps({ modelValue: String });
+const emit = defineEmits(['update:modelValue']);
+
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
@@ -45,6 +48,17 @@ const passwordContainDigitTip = () => {
   }
 }
 
+// 密碼是否一致
+const passwordMatchTip = () => {
+  if (confirmpasswordField.value.length === 0) {
+    return exclamationTip;
+  } else if (passwordField.value === confirmpasswordField.value) {
+    return checkTip;
+  } else {
+    return xmarkTip;
+  }
+}
+
 </script>
 
 <template>
@@ -53,20 +67,21 @@ const passwordContainDigitTip = () => {
     <label class="formControls_label" for="password">Password</label>
     <div class="password_input">
       <input class="formControls_input" :type="showPassword ? 'text' : 'password'" name="password" id="password"
-             placeholder="請輸入密碼" v-model="passwordField" required>
-      <a href="#" class="eye" @click="showPassword = !showPassword"><i
+             placeholder="請輸入密碼" v-model="passwordField" @input="emit('update:modelValue', passwordField)" required>
+      <a href="#" class="eye" @click.prevent="showPassword = !showPassword"><i
           :class="showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i></a>
     </div>
     <div class="password_input">
       <input class="formControls_input" :type="showConfirmPassword ? 'text' : 'password'" name="confirm-password"
              id="confirm-password" placeholder="請再次輸入密碼" v-model="confirmpasswordField" required>
-      <a href="#" class="eye" @click="showConfirmPassword = !showConfirmPassword"><i
+      <a href="#" class="eye" @click.prevent="showConfirmPassword = !showConfirmPassword"><i
           :class="showConfirmPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i></a>
     </div>
     <ul class="matchTip">
       <li><i :class="passwordLengthTip()"></i> 長度需為 6~12 碼</li>
       <li><i :class="passwordContainLetterTip()"></i> 至少 1 個英文字母</li>
       <li><i :class="passwordContainDigitTip()"></i> 至少 1 個數字</li>
+      <li><i :class="passwordMatchTip()"></i> 密碼是否一致</li>
     </ul>
   </div>
 
