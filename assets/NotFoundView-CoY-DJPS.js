@@ -1,0 +1,1 @@
+import{_ as t,h as a,u as n,c as r,a as o,o as c}from"./index-D9LBVFIm.js";const u={class:"wrap bg-yellow"},_={__name:"NotFoundView",setup(d){const s=n();return a(()=>{setTimeout(()=>{s.push("/")},3e3)}),(p,e)=>(c(),r("div",u,e[0]||(e[0]=[o("div",{class:"container"},[o("p",null,"此頁面不存在，正在導回登入頁...")],-1)])))}},i=t(_,[["__scopeId","data-v-15a13fdc"]]);export{i as default};
