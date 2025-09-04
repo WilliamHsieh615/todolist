@@ -1,41 +1,121 @@
 <script setup>
 
 import TheNav from '@/components/layout/TheNav.vue';
-import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getCookie } from '@/utils/cookie.js'
+import axios from 'axios'
+import Swal from 'sweetalert2';
 
-const route = useRoute()
+const router = useRouter()
+const api = 'https://todolist-api.hexschool.io/'
+
+const user = ref({ nickname: '', uid: '' })
 
 const todos = ref([])
-
 const newTodo = ref('')
 
 // 新增
-const addTodo = () => {
+const addTodo = async () => {
+  const token = getCookie('token')
   if (!newTodo.value.trim()) return
-  todos.value.push(
-    {
-      id: Date.now(),
-      text: newTodo.value,
-      completed: false
-    }
-  )
-  newTodo.value = ''
+  try {
+    const result = await axios.post(`${api}todos`,
+      { content: newTodo.value },
+      { headers: { Authorization: token } }
+    )
+    todos.value.push({
+      id: result.data.newTodo.id,
+      text: result.data.newTodo.content,
+      completed: result.data.newTodo.status
+    })
+    newTodo.value = ''
+  } catch (error) {
+    console.error('新增待辦失敗', error)
+  }
 }
 
 // 刪除
-const removeTodo = (id) => {
-  todos.value = todos.value.filter(todo => todo.id !== id)
+const removeTodo = async (id) => {
+  const token = getCookie('token')
+  try {
+    await axios.delete(`${api}todos/${id}`, { headers: { Authorization: token } })
+    todos.value = todos.value.filter(todo => todo.id !== id)
+  } catch (error) {
+    console.error('刪除待辦失敗', error)
+  }
 }
 
 // 已完成切換
-const toggleTodo = (id) => {
+const toggleTodo = async (id) => {
+  const token = getCookie('token')
   const todo = todos.value.find(t => t.id === id)
-  if (todo) todo.completed = !todo.completed
+  if (!todo) return
+  try {
+    const result = await axios.patch(`${api}todos/${id}/toggle`, {},
+      { headers: { Authorization: token } 
+    })
+    console.log(result);
+    todo.completed = !todo.completed
+  } catch (error) {
+    console.error('更新狀態失敗', error)
+  }
 }
 
 // 已完成數量
 const completedCount = computed(() => todos.value.filter(t => t.completed).length)
+
+onMounted(async () => {
+
+  const token = getCookie('token')
+
+  if (!token) {
+    router.push('/');
+    return;
+  }
+
+  // 取得使用者資訊
+  try {
+    const result = await axios.get(`${api}users/checkout`, {
+      headers: { Authorization: token }
+    })
+    user.value.nickname = result.data.nickname
+    user.value.uid = result.data.uid
+  } catch (error) {
+    console.error('取得使用者資訊失敗', error)
+  }
+
+  // 取得 todolist
+  try {
+    const result = await axios.get(`${api}todos`, {
+      headers: { Authorization: token }
+    });
+    console.log(result);
+    console.log(result.data);
+    todos.value = result.data.data;
+    todos.value = result.data.data.map(todo => ({
+      id: todo.id,
+      text: todo.content,
+      completed: todo.status
+    }));
+  } catch (error) {
+
+    let message = ''
+    if (error.response && error.response.status === 400) {
+      message = error.response.data.message;
+    } else {
+      message = "請稍後再試！！";
+    }
+    console.error("取得待辦事項失敗", message);
+
+    Swal.fire({
+      icon: "warning",
+      title: "取得待辦事項失敗",
+      text: message,
+      confirmButtonColor: "#d33",
+    });
+  }
+})
 
 </script>
 
@@ -55,19 +135,17 @@ const completedCount = computed(() => todos.value.filter(t => t.completed).lengt
         <div class="todoList_list" v-if="todos.length > 0">
           <ul class="todoList_tab">
             <li>
-              <router-link to="/todolist-page" class="tab-link" :class="{ active: route.path === '/todolist-page' }">
+              <router-link to="/todolist-page/all" class="tab-link" active-class="active" exact>
                 全部
               </router-link>
             </li>
             <li>
-              <router-link to="/todolist-page/active" class="tab-link"
-                :class="{ active: route.path === '/todolist-page/active' }">
+              <router-link to="/todolist-page/active" class="tab-link" active-class="active">
                 待完成
               </router-link>
             </li>
             <li>
-              <router-link to="/todolist-page/completed" class="tab-link"
-                :class="{ active: route.path === '/todolist-page/completed' }">
+              <router-link to="/todolist-page/completed" class="tab-link" active-class="active">
                 已完成
               </router-link>
             </li>
@@ -83,9 +161,9 @@ const completedCount = computed(() => todos.value.filter(t => t.completed).lengt
             </div>
           </div>
         </div>
-        <div class="todoList_list" v-else>
-          <p class="noItem">目前尚無待辦事項</p>
-          <img src="/public/todo_banner.png" alt="todo_banner">
+        <div class="noItem" v-else>
+          <p>目前尚無待辦事項</p>
+          <img src="/todo_banner.png" alt="todo_banner">
         </div>
       </div>
 
@@ -96,11 +174,8 @@ const completedCount = computed(() => todos.value.filter(t => t.completed).lengt
 
 <style scoped lang="scss">
 .wrap {
-  background-image: linear-gradient(175deg,
-      $background-color 40%,
-      #FFFFFF 40%,
-      #FFFFFF 80%,
-      $background-color 80%);
+  height: 100vh;
+  background-image: linear-gradient(175deg, #FFD370 60%, #fff 40%);
 }
 
 @media (max-width: 500px) {
@@ -263,14 +338,16 @@ const completedCount = computed(() => todos.value.filter(t => t.completed).lengt
           text-decoration: none;
         }
       }
+    }
 
-      .noItem{
-        font-size: 20px;
+    .noItem {
+      p {
+        font-size: 28px;
         text-align: center;
         margin: 30px;
       }
 
-      img{
+      img {
         padding: 20px;
       }
     }

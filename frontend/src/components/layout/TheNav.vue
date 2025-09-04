@@ -1,13 +1,55 @@
-<script setup></script>
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { deleteCookie, getCookie } from '@/utils/cookie.js'
+import Swal from 'sweetalert2'
+
+const router = useRouter()
+const nickname = ref('')
+
+// 登出
+const logout = () => {
+  Swal.fire({
+    icon: "warning",
+    title: `登出`,
+    text: "確定要登出嗎？",
+    confirmButtonText: '確定',
+    showCancelButton: true,
+    cancelButtonText: '取消'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      deleteCookie('token')
+      deleteCookie('nickname')
+
+      Swal.fire({
+        icon: 'success',
+        title: '即將登出',
+        text: '將傳送至登入頁',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      }).then(() => {
+        router.push('/')
+      })
+    }
+  })
+}
+
+onMounted(async () => {
+  const name = getCookie('nickname')
+  nickname.value = name ? name : ''
+})
+
+</script>
 
 <template>
 
   <nav class="nav">
     <h1>ONLINE TODO LIST</h1>
     <ul>
-      <li class="todo_sm"><span>王小明的代辦</span></li>
+      <li class="todo_sm"><span>{{ nickname ? nickname + ' 的代辦' : '您的代辦' }}</span></li>
       <li>
-        <router-link to="/">登出</router-link>
+        <a href="#" @click.prevent="logout">登出</a>
       </li>
     </ul>
   </nav>
@@ -23,7 +65,7 @@
   h1 {
     width: 500px;
     height: 60px;
-    background: url(/public/title.png) no-repeat center/cover;
+    background: url(/title.png) no-repeat center/cover;
     display: block;
     text-indent: 101%;
     overflow: hidden;

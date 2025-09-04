@@ -6,7 +6,7 @@ const emit = defineEmits(['remove', 'toggle'])
 <template>
   <li v-for="todo in props.todos.filter(t => t.completed)" :key="todo.id">
     <label class="todoList_label">
-      <input class="todoList_input" type="checkbox" :checked="todo.completed" @change="emit('toggle', todo.id)">
+      <input class="todoList_input" type="checkbox" :checked="todo.completed" @change="emit('toggle', todo.id)" />
       <span>{{ todo.text }}</span>
     </label>
     <a href="#" @click.prevent="emit('remove', todo.id)">

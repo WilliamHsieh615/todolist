@@ -3,8 +3,8 @@
 <template>
 
   <aside class="side">
-    <router-link to="/"><img class="logo" src="/public/title.png" alt="logo"></router-link>
-    <img class="d-m-n banner" src="/public/banner.png" alt="workImg">
+    <router-link to="/"><img class="logo" src="/title.png" alt="logo"></router-link>
+    <img class="d-m-n banner" src="/banner.png" alt="workImg">
   </aside>
 
 </template>

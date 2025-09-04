@@ -1,12 +1,6 @@
-import {createRouter, createWebHashHistory} from 'vue-router'
-import LoginView from '@/views/LoginView.vue'
-import RegisterView from '@/views/RegisterView.vue'
-import RetrieveView from '@/views/RetrieveView.vue'
-import TodoListPageView from '@/views/TodoListPage/TodoListPageView.vue'
-import TodoListAllView from '@/views/TodoListPage/TodoListAllView.vue'
-import TodoListActiveView from '@/views/TodoListPage/TodoListActiveView.vue'
-import TodoListCompletedView from '@/views/TodoListPage/TodoListCompletedView.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import Swal from 'sweetalert2'
+import { getCookie } from '@/utils/cookie.js'
 
 const router = createRouter({
     history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -14,46 +8,59 @@ const router = createRouter({
         {
             path: '/',
             name: 'login',
-            component: LoginView,
+            component: () => import('@/views/LoginView.vue')
         },
         {
             path: '/register',
             name: 'register',
-            component: RegisterView,
+            component: () => import('@/views/RegisterView.vue')
         },
         {
             path: '/retrieve',
             name: 'retrieve',
-            component: RetrieveView,
+            component: () => import('@/views/RetrieveView.vue')
         },
         {
             path: '/todolist-page',
             name: 'todolist-page',
-            component: TodoListPageView,
+            redirect: '/todolist-page/all',
+            component: () => import('@/views/TodoListPage/TodoListPageView.vue'),
+            meta: { requiresAuth: true },
             children: [
                 {
-                    path: '',
+                    path: 'all',
                     name: 'todolist.all',
-                    component: TodoListAllView
+                    component: () => import('@/views/TodoListPage/TodoListAllView.vue')
                 },
                 {
                     path: 'active',
                     name: 'todolist.active',
-                    component: TodoListActiveView
+                    component: () => import('@/views/TodoListPage/TodoListActiveView.vue')
                 },
                 {
                     path: 'completed',
                     name: 'todolist.completed',
-                    component: TodoListCompletedView
+                    component: () => import('@/views/TodoListPage/TodoListCompletedView.vue')
                 }
             ]
         },
         {
             path: '/:pathMatch(.*)*',
             name: 'NotFound',
-            component: NotFoundView
+            component: () => import('@/views/NotFoundView.vue')
         },
     ],
+})
+
+// 全域守衛
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    const token = getCookie('token')
+    if (!token) {
+      return next({ path: '/', query: { message: 'not-logged-in' } })
+    }
+  }
+  next()
 })
 
 export default router

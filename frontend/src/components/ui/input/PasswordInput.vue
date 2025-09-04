@@ -1,9 +1,14 @@
 <script setup>
 
-import {ref} from 'vue';
+import { ref } from 'vue';
 
-const props = defineProps({ modelValue: String });
-const emit = defineEmits(['update:modelValue']);
+const props = defineProps({
+  password: {
+    type: String,
+    default: ''
+  }
+});
+const emit = defineEmits(['update:password']);
 
 const showPassword = ref(false);
 
@@ -14,7 +19,8 @@ const showPassword = ref(false);
   <div class="password formControls_area">
     <label class="formControls_label" for="pwd">Password</label>
     <div class="password_input">
-      <input class="formControls_input" :type="showPassword ? 'text' : 'password'" name="pwd" id="pwd" placeholder="請輸入密碼" :value="props.modelValue" @input="emit('update:modelValue', $event.target.value)" required>
+      <input class="formControls_input" :type="showPassword ? 'text' : 'password'" name="pwd" id="pwd"
+        placeholder="請輸入密碼" :value="password" @input="emit('update:password', $event.target.value)" />
       <a href="#" class="eye" @click.prevent="showPassword = !showPassword"><i
           :class="showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i></a>
     </div>
