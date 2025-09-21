@@ -16,7 +16,7 @@ const loginData = reactive({
   password: ''
 });
 
-const api = 'https://todolist-api.hexschool.io/';
+const api = "/api/members";
 
 const login = async () => {
 
@@ -58,7 +58,7 @@ const login = async () => {
   }
 
   try {
-    const result = await axios.post(`${api}users/sign_in`, loginData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await axios.post(`${api}/login`, loginData, { headers: { 'Content-Type': 'application/json' } });
     console.log("登入成功", result);
     console.log(result.data.token);
 

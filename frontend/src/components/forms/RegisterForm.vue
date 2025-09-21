@@ -15,12 +15,12 @@ const registerData = reactive({
   email: '',
   password: '',
   nickname: '',
-  // birthday: ''
+  birthday: ''
 })
 
 const confirmPasswordField = ref('')
 
-const api = 'https://todolist-api.hexschool.io/';
+const api = "/api/members";
 
 const register = async () => {
 
@@ -75,18 +75,18 @@ const register = async () => {
   }
   
   // 檢查生日格式
-  const birthdayPattern = /^\d{4}\/\d{2}\/\d{2}$/;
+  const birthdayPattern = /^\d{4}-\d{2}-\d{2}$/;
   if (!birthdayPattern.test(registerData.birthday)) {
     return Swal.fire({
       icon: 'warning',
       title: '生日格式不正確',
-      text: '請輸入正確格式 YYYY/MM/DD 或使用日期選擇器',
+      text: '請輸入正確格式 YYYY-MM-DD 或使用日期選擇器',
       confirmButtonColor: "#d33",
     });
   }
 
   try {
-    const result = await axios.post(`${api}users/sign_up`, registerData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await axios.post(`${api}/register`, registerData, { headers: { 'Content-Type': 'application/json' } });
     console.log("註冊成功", result);
     Swal.fire({
       icon: "success",

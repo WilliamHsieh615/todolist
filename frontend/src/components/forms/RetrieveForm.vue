@@ -18,12 +18,14 @@ const verifyData = reactive({
 })
 
 const retrieveData = reactive({
+  memberId: null,
+  token: '',
   password: ''
 })
 
 const confirmPasswordField = ref('')
 
-const api = 'https://todolist-api.hexschool.io/';
+const api = '/api/members';
 
 const verify = async () => {
 
@@ -51,18 +53,18 @@ const verify = async () => {
   }
 
   // 檢查生日格式
-  const birthdayPattern = /^\d{4}\/\d{2}\/\d{2}$/;
+  const birthdayPattern = /^\d{4}-\d{2}-\d{2}$/;
   if (!birthdayPattern.test(verifyData.birthday)) {
     return Swal.fire({
       icon: 'warning',
       title: '生日格式不正確',
-      text: '請輸入正確格式 YYYY/MM/DD 或使用日期選擇器',
+      text: '請輸入正確格式 YYYY-MM-DD 或使用日期選擇器',
       confirmButtonColor: "#d33",
     });
   }
 
   try {
-    const result = await axios.post(`${api}users/verify`, verifyData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await axios.post(`${api}/verify`, verifyData, { headers: { 'Content-Type': 'application/json' } });
     console.log("驗證成功", result);
     Swal.fire({
       icon: "success",
@@ -71,6 +73,8 @@ const verify = async () => {
       timer: 2000,
       timerProgressBar: true,
     });
+    retrieveData.memberId = result.data.memberId;
+    retrieveData.token = result.data.token;
     verified.value = true;
   } catch (error) {
     console.error("驗證失敗", error);
@@ -115,7 +119,7 @@ const retrieve = async () => {
   }
 
   try {
-    const result = await axios.post(`${api}users/retrieve`, retrieveData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await axios.post(`${api}/retrieve`, retrieveData, { headers: { 'Content-Type': 'application/json' } });
     console.log("密碼重設成功", result);
     Swal.fire({
       icon: "success",
@@ -155,7 +159,7 @@ const retrieve = async () => {
     </template>
 
     <template v-else>
-      <CompletePasswordInput v-model:password="registerData.password" v-model:confirmPassword="confirmPasswordField" />
+      <CompletePasswordInput v-model:password="retrieveData.password" v-model:confirmPassword="confirmPasswordField" />
       <!-- 上線使用 -->
       <input class="formControls_btnSubmit" type="submit" value="重設">
     </template>

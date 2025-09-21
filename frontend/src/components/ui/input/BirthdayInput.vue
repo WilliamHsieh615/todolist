@@ -14,7 +14,7 @@ const emit = defineEmits(['update:birthday'])
 
 onMounted(() => {
   flatpickr('#birthday', {
-    dateFormat: 'Y/m/d',
+    dateFormat: 'Y-m-d',
     maxDate: 'today',
     allowInput: true,
     disableMobile: true,
