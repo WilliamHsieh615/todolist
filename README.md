@@ -45,7 +45,7 @@ TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite
 - Node.js 18+ 與 npm / pnpm / yarn
 - MySQL
 
-1. ** 資料庫 MySQL **
+1. **資料庫 MySQL**
 
 - 建立資料庫名稱：todolist。
 -  匯入專案提供的資料表結構。
