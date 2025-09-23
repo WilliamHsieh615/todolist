@@ -91,6 +91,6 @@ TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite
     npm run preview
 
 Vite proxy 建議（repo 已有 /api proxy 設定）：
-- vite.config.js 把 /api 代理到 http://localhost:8080（你的後端）
+- vite.config.js 把 /api 代理到 http://localhost:8080
 - 若要避免 CORS 問題，固定 dev server port（例如 5173）並在後端 CORS 白名單加入該 origin。
 
