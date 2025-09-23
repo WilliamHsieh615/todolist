@@ -3,9 +3,13 @@ package com.williamhsieh.todolist.controller;
 import com.williamhsieh.todolist.dto.*;
 import com.williamhsieh.todolist.model.Member;
 import com.williamhsieh.todolist.service.MemberService;
+import com.williamhsieh.todolist.util.CookieUtil;
+import com.williamhsieh.todolist.util.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,19 +23,34 @@ public class MemberController {
     private MemberService memberService;
 
     @PostMapping("/members/register")
-    public ResponseEntity<Member> register(@RequestBody @Valid MemberRegisterRequest memberRegisterRequest) {
+    public ResponseEntity<?> register(@RequestBody @Valid MemberRegisterRequest memberRegisterRequest) {
 
         Integer memberId = memberService.register(memberRegisterRequest);
 
-        Member member = memberService.getMemberById(memberId);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(member);
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email 已存在");
+        } else {
+            Member member = memberService.getMemberById(memberId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(member);
+        }
     }
 
     @PostMapping("/members/login")
-    public ResponseEntity<MemberLoginResponse> login(@RequestBody @Valid MemberLoginRequest memberLoginRequest) {
+    public ResponseEntity<MemberLoginResponse> login(@RequestBody @Valid MemberLoginRequest memberLoginRequest, HttpServletResponse response) {
 
         MemberLoginResponse memberLoginResponse = memberService.login(memberLoginRequest);
+
+        String jwtToken = JwtUtil.generateToken(memberLoginRequest.getEmail());
+        ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(
+                "token", // 名稱
+                jwtToken,  // JWT
+                24 * 60 * 60, // 1 天
+                "/", // path
+                true, // secure
+                "Strict" // sameSite
+        );
+
+        CookieUtil.addCookie(response, cookie);
 
         return ResponseEntity.status(HttpStatus.OK).body(memberLoginResponse);
 

@@ -26,7 +26,7 @@ public class MemberDaoImpl implements MemberDao {
 
         String sql = "SELECT member_id, email, password, " +
                 "nickname, birthday, created_date, last_modified_date " +
-                "FROM member WHERE member_id = :memberId";
+                "FROM members WHERE member_id = :memberId";
 
         Map<String,Object> map = new HashMap<>();
         map.put("memberId", memberId);
@@ -46,7 +46,7 @@ public class MemberDaoImpl implements MemberDao {
 
         String sql = "SELECT member_id, email, password, " +
                 "nickname, birthday, created_date, last_modified_date " +
-                "FROM member WHERE email = :email";
+                "FROM members WHERE email = :email";
 
         Map<String,Object> map = new HashMap<>();
         map.put("email", email);
@@ -64,7 +64,7 @@ public class MemberDaoImpl implements MemberDao {
     @Override
     public Integer createMember(MemberRegisterRequest memberRegisterRequest) {
 
-        String sql = "INSERT INTO member(email, password, nickname, birthday, " +
+        String sql = "INSERT INTO members(email, password, nickname, birthday, " +
                 "created_date, last_modified_date) " +
                 "VALUES (:email, :password, :nickname, :birthday, " +
                 ":created_date, :last_modified_date) ";
@@ -93,7 +93,7 @@ public class MemberDaoImpl implements MemberDao {
     @Override
     public void updateMemberPassword(Integer memberId, String hashedPassword) {
 
-        String sql = "UPDATE member SET password = :password, last_modified_date = :lastModifiedDate " +
+        String sql = "UPDATE members SET password = :password, last_modified_date = :lastModifiedDate " +
                 "WHERE member_id = :memberId";
 
         Map<String,Object> map = new HashMap<>();

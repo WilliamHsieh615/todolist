@@ -1,29 +1,30 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { deleteCookie, getCookie } from '@/utils/cookie.js'
+import { useAuthStore } from '@/stores/auth'
 import Swal from 'sweetalert2'
 
+const authStore = useAuthStore()
 const router = useRouter()
-const nickname = ref('')
+
+const nickname = computed(() => authStore.nickname)
 
 // 登出
 const logout = () => {
   Swal.fire({
     icon: "warning",
-    title: `登出`,
+    title: "即將登出",
     text: "確定要登出嗎？",
     confirmButtonText: '確定',
     showCancelButton: true,
     cancelButtonText: '取消'
   }).then((result) => {
     if (result.isConfirmed) {
-      deleteCookie('token')
-      deleteCookie('nickname')
+      authStore.logoutSuccess()
 
       Swal.fire({
         icon: 'success',
-        title: '即將登出',
+        title: '已登出',
         text: '將傳送至登入頁',
         timer: 2000,
         timerProgressBar: true,
@@ -34,11 +35,6 @@ const logout = () => {
     }
   })
 }
-
-onMounted(async () => {
-  const name = getCookie('nickname')
-  nickname.value = name ? name : ''
-})
 
 </script>
 

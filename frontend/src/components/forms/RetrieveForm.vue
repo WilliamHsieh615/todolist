@@ -5,8 +5,8 @@ import { useRouter } from 'vue-router';
 import EmailInput from '../ui/input/EmailInput.vue';
 import CompletePasswordInput from '../ui/input/CompletePasswordInput.vue';
 import BirthdayInput from '../ui/input/BirthdayInput.vue';
-import axios from 'axios';
 import Swal from 'sweetalert2';
+import { verify, retrieve } from '@/plugins/members';
 
 const router = useRouter();
 
@@ -25,12 +25,11 @@ const retrieveData = reactive({
 
 const confirmPasswordField = ref('')
 
-const api = '/api/members';
+const renderVerify = async () => {
 
-const verify = async () => {
+  // console.log('email:', verifyData.email)
+  // console.log('birthday:', verifyData.birthday)
 
-  console.log('email:', verifyData.email)
-  console.log('birthday:', verifyData.birthday)
   // 檢查是否為空值
   if (!verifyData.email || !verifyData.birthday) {
     return Swal.fire({
@@ -64,7 +63,7 @@ const verify = async () => {
   }
 
   try {
-    const result = await axios.post(`${api}/verify`, verifyData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await verify(verifyData);
     console.log("驗證成功", result);
     Swal.fire({
       icon: "success",
@@ -90,10 +89,10 @@ const verify = async () => {
   }
 }
 
-const retrieve = async () => {
+const renderRetrieve = async () => {
 
-  console.log('password:', retrieveData.password)
-  console.log('confirmPassword:', confirmPasswordField.value)
+  // console.log('password:', retrieveData.password)
+  // console.log('confirmPassword:', confirmPasswordField.value)
 
   // 密碼格式檢查
   if (!/\d/.test(retrieveData.password) ||
@@ -119,7 +118,7 @@ const retrieve = async () => {
   }
 
   try {
-    const result = await axios.post(`${api}/retrieve`, retrieveData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await retrieve(retrieveData);
     console.log("密碼重設成功", result);
     Swal.fire({
       icon: "success",
@@ -148,14 +147,14 @@ const retrieve = async () => {
 
 <template>
 
-  <form class="formControls" @submit.prevent="retrieve">
+  <form class="formControls" @submit.prevent="renderRetrieve">
 
     <h2 class="formControls_txt">重設密碼</h2>
 
     <template v-if="!verified">
       <EmailInput v-model:email="verifyData.email" />
       <BirthdayInput v-model:birthday="verifyData.birthday" />
-      <input class="formControls_btnSubmit" type="button" value="驗證" @click="verify">
+      <input class="formControls_btnSubmit" type="button" value="驗證" @click="renderVerify">
     </template>
 
     <template v-else>

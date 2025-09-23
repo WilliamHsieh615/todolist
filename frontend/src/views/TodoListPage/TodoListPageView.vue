@@ -2,32 +2,29 @@
 
 import TheNav from '@/components/layout/TheNav.vue';
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { getCookie } from '@/utils/cookie.js'
-import axios from 'axios'
 import Swal from 'sweetalert2';
-
-const router = useRouter()
-const api = 'https://todolist-api.hexschool.io/'
-
-const user = ref({ nickname: '', uid: '' })
+import { addTodo, removeTodo, toggleTodo, getTodos } from '@/plugins/todos';
 
 const todos = ref([])
 const newTodo = ref('')
 
 // 新增
-const addTodo = async () => {
-  const token = getCookie('token')
-  if (!newTodo.value.trim()) return
+const renderAddTodo = async () => {
+  if (!newTodo.value.trim()) {
+    Swal.fire({
+      icon: "warning",
+      title: "尚未輸入代辦事項",
+      text: "請輸入待辦事項",
+      confirmButtonColor: "#d33",
+    });
+    return
+  } 
   try {
-    const result = await axios.post(`${api}todos`,
-      { content: newTodo.value },
-      { headers: { Authorization: token } }
-    )
+    const result = await addTodo(newTodo.value)
     todos.value.push({
-      id: result.data.newTodo.id,
-      text: result.data.newTodo.content,
-      completed: result.data.newTodo.status
+      id: result.data.todoId,
+      text: result.data.text,
+      completed: result.data.completed
     })
     newTodo.value = ''
   } catch (error) {
@@ -36,10 +33,10 @@ const addTodo = async () => {
 }
 
 // 刪除
-const removeTodo = async (id) => {
-  const token = getCookie('token')
+const renderRemoveTodo = async (id) => {
+  console.log(id);
   try {
-    await axios.delete(`${api}todos/${id}`, { headers: { Authorization: token } })
+    await removeTodo(id)
     todos.value = todos.value.filter(todo => todo.id !== id)
   } catch (error) {
     console.error('刪除待辦失敗', error)
@@ -47,15 +44,11 @@ const removeTodo = async (id) => {
 }
 
 // 已完成切換
-const toggleTodo = async (id) => {
-  const token = getCookie('token')
+const renderToggleTodo = async (id) => {
   const todo = todos.value.find(t => t.id === id)
   if (!todo) return
   try {
-    const result = await axios.patch(`${api}todos/${id}/toggle`, {},
-      { headers: { Authorization: token } 
-    })
-    console.log(result);
+    await toggleTodo(id)
     todo.completed = !todo.completed
   } catch (error) {
     console.error('更新狀態失敗', error)
@@ -65,38 +58,19 @@ const toggleTodo = async (id) => {
 // 已完成數量
 const completedCount = computed(() => todos.value.filter(t => t.completed).length)
 
+
 onMounted(async () => {
 
-  const token = getCookie('token')
-
-  if (!token) {
-    router.push('/');
-    return;
-  }
-
-  // 取得使用者資訊
+  // 取得 todos
   try {
-    const result = await axios.get(`${api}users/checkout`, {
-      headers: { Authorization: token }
-    })
-    user.value.nickname = result.data.nickname
-    user.value.uid = result.data.uid
-  } catch (error) {
-    console.error('取得使用者資訊失敗', error)
-  }
+    const result = await getTodos()
 
-  // 取得 todolist
-  try {
-    const result = await axios.get(`${api}todos`, {
-      headers: { Authorization: token }
-    });
     console.log(result);
-    console.log(result.data);
-    todos.value = result.data.data;
+
     todos.value = result.data.data.map(todo => ({
-      id: todo.id,
-      text: todo.content,
-      completed: todo.status
+      id: todo.itemId,
+      text: todo.text,
+      completed: todo.completed
     }));
   } catch (error) {
 
@@ -130,7 +104,7 @@ onMounted(async () => {
       <div class="todoList_Content">
         <div class="inputBox">
           <input v-model="newTodo" type="text" placeholder="請輸入待辦事項">
-          <a href="#" @click.prevent="addTodo"><i class="fa fa-plus"></i></a>
+          <a href="#" @click.prevent="renderAddTodo"><i class="fa fa-plus"></i></a>
         </div>
         <div class="todoList_list" v-if="todos.length > 0">
           <ul class="todoList_tab">
@@ -153,7 +127,7 @@ onMounted(async () => {
           <div class="todoList_items">
             <ul class="todoList_item">
               <router-view v-slot="{ Component }">
-                <component :is="Component" :todos="todos" @remove="removeTodo" @toggle="toggleTodo" />
+                <component :is="Component" :todos="todos" @remove="renderRemoveTodo" @toggle="renderToggleTodo" />
               </router-view>
             </ul>
             <div class="todoList_statistics">

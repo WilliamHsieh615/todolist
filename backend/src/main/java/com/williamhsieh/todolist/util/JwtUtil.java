@@ -1,11 +1,9 @@
 package com.williamhsieh.todolist.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -23,7 +21,13 @@ import java.util.Date;
 
 public class JwtUtil {
 
+    // 固定金鑰(重啟程式 JWT 不會變，不需重新登入，但較不安全)
+//    private static final String SECRET = "my-super-secret-key-in-my-todo-list";
+//    private static final Key key = Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+
+    // 隨機金鑰(重啟程式 JWT 會變，需重新登入)
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
     private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1小時
 
     // 產生 Token
@@ -45,6 +49,24 @@ public class JwtUtil {
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token);
+    }
+
+    // 驗證是否過期
+    public static boolean isExpired(String token) {
+        Date expiration = parseToken(token).getBody().getExpiration();
+        return expiration.before(new Date());
+    }
+    public static boolean isExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
+    }
+
+    // 嘗試驗證，回傳 Claims
+    public static Claims validateToken(String token) {
+        try {
+            return parseToken(token).getBody();
+        } catch (JwtException e) {
+            return null;
+        }
     }
 
     // 取得過期時間

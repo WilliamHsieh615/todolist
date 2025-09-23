@@ -6,8 +6,8 @@ import EmailInput from '../ui/input/EmailInput.vue';
 import CompletePasswordInput from '../ui/input/CompletePasswordInput.vue';
 import NicknameInput from '../ui/input/NicknameInput.vue';
 import BirthdayInput from '../ui/input/BirthdayInput.vue';
-import axios from 'axios';
 import Swal from 'sweetalert2';
+import { register } from '@/plugins/members';
 
 const router = useRouter();
 
@@ -20,15 +20,13 @@ const registerData = reactive({
 
 const confirmPasswordField = ref('')
 
-const api = "/api/members";
+const renderRegister = async () => {
 
-const register = async () => {
-
-  console.log('email:', registerData.email)
-  console.log('password:', registerData.password)
-  console.log('confirmPassword:', confirmPasswordField.value)
-  console.log('nickname:', registerData.nickname)
-  console.log('birthday:', registerData.birthday)
+  // console.log('email:', registerData.email)
+  // console.log('password:', registerData.password)
+  // console.log('confirmPassword:', confirmPasswordField.value)
+  // console.log('nickname:', registerData.nickname)
+  // console.log('birthday:', registerData.birthday)
 
   // 檢查是否為空值
   if (!registerData.email || !registerData.password || !registerData.nickname || !registerData.birthday || !confirmPasswordField.value) {
@@ -86,11 +84,11 @@ const register = async () => {
   }
 
   try {
-    const result = await axios.post(`${api}/register`, registerData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await register(registerData);
     console.log("註冊成功", result);
     Swal.fire({
       icon: "success",
-      title: `${registerData.nickname} 註冊成功`,
+      title: `${result.data.nickname} 註冊成功`,
       text: "將傳送至登入頁",
       timer: 2000,
       timerProgressBar: true,
@@ -118,7 +116,7 @@ const register = async () => {
 
 <template>
 
-  <form class="formControls" @submit.prevent="register">
+  <form class="formControls" @submit.prevent="renderRegister">
 
     <h2 class="formControls_txt">註冊帳號</h2>
 

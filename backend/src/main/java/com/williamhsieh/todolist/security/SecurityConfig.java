@@ -35,7 +35,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/members/login", "/members/register", "/members/verify", "/members/retrieve").permitAll()
-                        .requestMatchers("/members/checkout","/todos/**").authenticated()
+                        .requestMatchers("/todos/**").authenticated()
                         .anyRequest().denyAll()
                 )
 
@@ -50,9 +50,10 @@ public class SecurityConfig {
 
     private CorsConfigurationSource createCorsConfig() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"));
         config.setAllowedMethods(List.of("*"));
-//        config.setAllowCredentials(true);
+        config.setAllowCredentials(true);
+        config.setAllowedHeaders(List.of("*"));
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

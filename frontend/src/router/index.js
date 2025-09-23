@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Swal from 'sweetalert2'
-import { getCookie } from '@/utils/cookie.js'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
     history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -54,13 +53,11 @@ const router = createRouter({
 
 // 全域守衛
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    const token = getCookie('token')
-    if (!token) {
-      return next({ path: '/', query: { message: 'not-logged-in' } })
+    const authStore = useAuthStore()
+    if (to.matched.some(record => record.meta.requiresAuth) && !authStore.isLoggedIn) {
+        return next({ path: '/', query: { message: 'not-logged-in' } })
     }
-  }
-  next()
+    next()
 })
 
 export default router

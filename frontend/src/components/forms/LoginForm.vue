@@ -4,24 +4,24 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import EmailInput from '../ui/input/EmailInput.vue';
 import PasswordInput from '../ui/input/PasswordInput.vue';
-import axios from 'axios';
 import Swal from 'sweetalert2';
+import { login } from '@/plugins/members';
 
-import { setCookie } from '@/utils/cookie.js';
+import { useAuthStore } from '@/stores/auth';
 
+const authStore = useAuthStore()
 const router = useRouter();
+
 
 const loginData = reactive({
   email: '',
   password: ''
 });
 
-const api = "/api/members";
+const renderLogin = async () => {
 
-const login = async () => {
-
-  console.log('email:', loginData.email)
-  console.log('password:', loginData.password)
+  // console.log('email:', loginData.email)
+  // console.log('password:', loginData.password)
 
   // 檢查是否為空值
   if (!loginData.email || !loginData.password) {
@@ -58,17 +58,13 @@ const login = async () => {
   }
 
   try {
-    const result = await axios.post(`${api}/login`, loginData, { headers: { 'Content-Type': 'application/json' } });
+    const result = await login(loginData);
+    authStore.loginSuccess(result.data.nickname, result.data.memberId)
     console.log("登入成功", result);
-    console.log(result.data.token);
-
-    setCookie("token", result.data.token, 1);
-    setCookie("nickname", result.data.nickname, 1);
-
     Swal.fire({
       icon: "success",
       title: "登入成功",
-      text: result.data.nickname + " 歡迎回來！",
+      text: `${result.data.nickname} 歡迎回來！`,
       confirmButtonColor: "#4f46e5",
       timer: 2000,
       timerProgressBar: true,
@@ -78,7 +74,6 @@ const login = async () => {
 
   } catch (error) {
     console.error("登入失敗", error);
-
     let message;
     if (error.response && (error.response.status === 400 ||
       error.response.status === 401 ||
@@ -104,7 +99,7 @@ const login = async () => {
 
 <template>
 
-  <form class="formControls" @submit.prevent="login">
+  <form class="formControls" @submit.prevent="renderLogin">
 
     <h2 class="formControls_txt">最實用的線上代辦事項服務</h2>
 
