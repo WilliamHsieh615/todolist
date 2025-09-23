@@ -48,7 +48,7 @@ TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite
 1. **資料庫 MySQL**
 
 - 建立資料庫名稱：todolist。
--  匯入專案提供的資料表結構。
+- 匯入專案提供的資料表結構。
     ```sql
     -- 建立 members 資料表
     CREATE TABLE members (
@@ -73,9 +73,24 @@ TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite
     );
 - 確認資料庫帳號密碼與權限設定。
 
-
+2. **後端 Spring Boot**
     ```bash
-      npm install --save-dev gh-pages // 只要做一次就好
-      npm run build
-      npm run deploy
+    cd backend
+    # 編譯並啟動
+    ./mvnw spring-boot:run
+    # 或
+    mvn spring-boot:run
+
+3. **前端**
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    # 或
+    npm run build
+    npm run preview
+
+Vite proxy 建議（repo 已有 /api proxy 設定）：
+- vite.config.js 把 /api 代理到 http://localhost:8080（你的後端）
+- 若要避免 CORS 問題，固定 dev server port（例如 5173）並在後端 CORS 白名單加入該 origin。
 
