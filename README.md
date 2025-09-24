@@ -8,15 +8,13 @@
 ---
 
 ## 專案介紹
-TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite，後端使用 Java Spring Boot 提供 REST API，包含會員註冊 / 登入（JWT）、Todo CRUD 等功能。專案範例適合用來練習前後端認證、CORS 與 JWT 的整合。
+TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite，後端使用 Java Spring Boot 提供 REST API，包含會員註冊 / 登入（JWT）、Todo CRUD 等功能，並使用 Spting Security實作前後端認證、CORS 與 JWT 的整合。
 
 ---
 
 ## 功能介紹
 - 會員註冊 / 登入（JWT 驗證）/ 重設密碼
 - Todo 新增 / 修改 / 刪除 / 標記完成
-- 本地開發可使用 Vite dev server 與 Spring Boot backend 同時測試
-- (Demo) 部署在 GitHub Pages（前端靜態）與後端本地或另行部署
 
 ---
 
@@ -30,9 +28,9 @@ TodoList 是一個前後端分離的待辦清單應用，前端使用 Vue + Vite
 
 ### 後端技術
 
-- Java（Spring Boot） + Spring Security（JWT 驗證與 Filter）
+- Java 的 Spring Boot + Spring Security（JWT 驗證與 Filter）
 - JJWT（io.jsonwebtoken）處理 JWT
-- 資料庫：MySQL（或相容的 RDBMS）
+- MySQL 資料庫
 
 ---
 
