@@ -3,9 +3,11 @@ package com.williamhsieh.todolist.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 import java.time.LocalDate;
 
+@Data
 public class MemberVerifyRequest {
 
     @NotBlank
@@ -14,20 +16,4 @@ public class MemberVerifyRequest {
 
     @NotNull
     private LocalDate birthday;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public LocalDate getBirthday() {
-        return birthday;
-    }
-
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
-    }
 }

@@ -1,53 +1,68 @@
 package com.williamhsieh.todolist.service;
 
-import com.williamhsieh.todolist.dao.MemberDao;
+import com.williamhsieh.todolist.Repository.MemberRepository;
 import com.williamhsieh.todolist.dto.*;
 import com.williamhsieh.todolist.model.Member;
 import com.williamhsieh.todolist.util.JwtUtil;
 import com.williamhsieh.todolist.util.UuidUtil;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+
 @Component
 public class MemberServiceImpl implements MemberService {
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
     public Member getMemberById(Integer memberId) {
-        return memberDao.getMemberById(memberId);
+
+        Member member = memberRepository.findById(memberId).orElse(null);
+
+        return member;
     }
 
     @Override
     public Integer register(MemberRegisterRequest memberRegisterRequest) {
-        // 判斷 email 是否被註冊過
-        Member member = memberDao.getMemberByEmail(memberRegisterRequest.getEmail());
 
-        if (member != null) {
+        // 判斷 email 是否被註冊過
+        Member existing = memberRepository.findByEmail(memberRegisterRequest.getEmail());
+
+        if (existing != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email 已存在");
         }
 
+        Member member = new Member();
+        member.setEmail(memberRegisterRequest.getEmail());
+
         // 使用統一的 PasswordEncoder 進行加密
         String hashedPassword = passwordEncoder.encode(memberRegisterRequest.getPassword());
-        memberRegisterRequest.setPassword(hashedPassword);
+        member.setPassword(hashedPassword);
 
-        // 創建帳號
-        return memberDao.createMember(memberRegisterRequest);
+        member.setNickname(memberRegisterRequest.getNickname());
+        member.setBirthday(memberRegisterRequest.getBirthday());
+
+        LocalDateTime now = LocalDateTime.now();
+        member.setCreatedDate(now);
+        member.setLastModifiedDate(now);
+
+        Integer memberId = memberRepository.save(member).getMemberId();
+
+        return memberId;
     }
 
     @Override
     public MemberLoginResponse login(MemberLoginRequest memberLoginRequest) {
 
-        Member member = memberDao.getMemberByEmail(memberLoginRequest.getEmail());
+        Member member = memberRepository.findByEmail(memberLoginRequest.getEmail());
 
         // 檢查 member 是否存在
         if (member == null) {
@@ -75,32 +90,31 @@ public class MemberServiceImpl implements MemberService {
     public MemberVerifyResponse getMemberVerify( MemberVerifyRequest memberVerifyRequest ) {
 
         // 判斷 email 是否被註冊過
-        Member member = memberDao.getMemberByEmail(memberVerifyRequest.getEmail());
+        Member member = memberRepository.findByEmail(memberVerifyRequest.getEmail());
 
-        if (member != null && member.getBirthday().equals(memberVerifyRequest.getBirthday())) {
-
-            MemberVerifyResponse memberVerifyResponse = new MemberVerifyResponse();
-            memberVerifyResponse.setMemberId(member.getMemberId());
-            TokenData tokendata = UuidUtil.generateUuid(member.getMemberId());
-            memberVerifyResponse.setToken(tokendata.getToken());
-            memberVerifyResponse.setExp(tokendata.getExp());
-
-            return memberVerifyResponse;
-
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email 或 生日 不正確");
+        if (member == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email 不存在");
         }
 
+        if (!member.getBirthday().equals(memberVerifyRequest.getBirthday())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "生日不正確");
+        }
+
+        MemberVerifyResponse memberVerifyResponse = new MemberVerifyResponse();
+        memberVerifyResponse.setMemberId(member.getMemberId());
+        TokenData tokendata = UuidUtil.generateUuid(member.getMemberId());
+        memberVerifyResponse.setToken(tokendata.getToken());
+        memberVerifyResponse.setExp(tokendata.getExp());
+
+        return memberVerifyResponse;
     }
 
     @Override
     public void resetPassword(MemberRetrieveRequest memberRetrieveRequest) {
 
         // 取得會員
-        Member member = memberDao.getMemberById(memberRetrieveRequest.getMemberId());
-        if (member == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "會員不存在");
-        }
+        Member member = memberRepository.findById(memberRetrieveRequest.getMemberId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "會員不存在"));
 
         // 驗證 UUID token
         if (!UuidUtil.checkToken(
@@ -111,7 +125,8 @@ public class MemberServiceImpl implements MemberService {
 
         // 更新密碼
         String hashedPassword = passwordEncoder.encode(memberRetrieveRequest.getPassword());
-        memberDao.updateMemberPassword(memberRetrieveRequest.getMemberId(), hashedPassword);
+        member.setPassword(hashedPassword);
+        memberRepository.save(member);
 
         // 清除 token
         UuidUtil.clearToken(memberRetrieveRequest.getMemberId());

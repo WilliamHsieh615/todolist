@@ -1,6 +1,6 @@
 package com.williamhsieh.todolist.security;
 
-import com.williamhsieh.todolist.dao.MemberDao;
+import com.williamhsieh.todolist.Repository.MemberRepository;
 import com.williamhsieh.todolist.model.Member;
 import com.williamhsieh.todolist.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -23,7 +23,7 @@ import java.util.Arrays;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                Member member = memberDao.getMemberByEmail(username);
+                Member member = memberRepository.findByEmail(username);
                 if (member == null) {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Member not found");
                     return;
@@ -85,4 +85,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    @Autowired
+    public void setMemberRepository(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
 }

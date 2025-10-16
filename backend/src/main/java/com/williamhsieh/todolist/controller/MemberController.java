@@ -13,7 +13,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,11 +25,11 @@ public class MemberController {
     public ResponseEntity<?> register(@RequestBody @Valid MemberRegisterRequest memberRegisterRequest) {
 
         Integer memberId = memberService.register(memberRegisterRequest);
+        Member member = memberService.getMemberById(memberId);
 
         if (memberId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email 已存在");
         } else {
-            Member member = memberService.getMemberById(memberId);
             return ResponseEntity.status(HttpStatus.CREATED).body(member);
         }
     }

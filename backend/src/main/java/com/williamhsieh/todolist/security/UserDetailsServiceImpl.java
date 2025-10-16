@@ -1,6 +1,6 @@
 package com.williamhsieh.todolist.security;
 
-import com.williamhsieh.todolist.dao.MemberDao;
+import com.williamhsieh.todolist.Repository.MemberRepository;
 import com.williamhsieh.todolist.model.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,16 +17,16 @@ import java.util.List;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private MemberDao memberDao;
+    private MemberRepository memberRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Member member = memberDao.getMemberByEmail(username);
+        Member member = memberRepository.findByEmail(username);
 
         if (member == null) {
             throw new UsernameNotFoundException("User not found: " + username);
-        } else{
+        } else {
             String memberEmail = member.getEmail();
             String memberPassword = member.getPassword();
 
