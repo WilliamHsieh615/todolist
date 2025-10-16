@@ -1,6 +1,6 @@
 package com.williamhsieh.todolist.service;
 
-import com.williamhsieh.todolist.Repository.MemberRepository;
+import com.williamhsieh.todolist.repository.MemberRepository;
 import com.williamhsieh.todolist.dto.*;
 import com.williamhsieh.todolist.model.Member;
 import com.williamhsieh.todolist.util.JwtUtil;

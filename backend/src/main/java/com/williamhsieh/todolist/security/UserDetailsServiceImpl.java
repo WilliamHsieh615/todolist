@@ -1,6 +1,6 @@
 package com.williamhsieh.todolist.security;
 
-import com.williamhsieh.todolist.Repository.MemberRepository;
+import com.williamhsieh.todolist.repository.MemberRepository;
 import com.williamhsieh.todolist.model.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;

@@ -1,7 +1,7 @@
 package com.williamhsieh.todolist.service;
 
-import com.williamhsieh.todolist.Repository.MemberRepository;
-import com.williamhsieh.todolist.Repository.TodoRepository;
+import com.williamhsieh.todolist.repository.MemberRepository;
+import com.williamhsieh.todolist.repository.TodoRepository;
 import com.williamhsieh.todolist.dto.DataItem;
 import com.williamhsieh.todolist.dto.TodoAddResponse;
 import com.williamhsieh.todolist.dto.TodoRequest;

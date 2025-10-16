@@ -1,4 +1,4 @@
-package com.williamhsieh.todolist.Repository;
+package com.williamhsieh.todolist.repository;
 
 import com.williamhsieh.todolist.model.Member;
 import org.springframework.data.repository.CrudRepository;

@@ -1,6 +1,6 @@
 package com.williamhsieh.todolist.security;
 
-import com.williamhsieh.todolist.Repository.MemberRepository;
+import com.williamhsieh.todolist.repository.MemberRepository;
 import com.williamhsieh.todolist.model.Member;
 import com.williamhsieh.todolist.util.JwtUtil;
 import io.jsonwebtoken.Claims;
